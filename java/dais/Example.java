@@ -21,12 +21,12 @@ public class Example {
                                 Arrays.asList((Predicate<Map<Object,Object>>) (Map<Object,Object> ctx) -> ctx.containsKey("b")));
 
         return Chain.execute(context,
-                             Arrays.asList(new Interceptor((Map<Object,Object> ctx) -> Maps.put(ctx, "a", 1),
-                                                           (Map<Object,Object> ctx) -> Maps.put(ctx, "leave-a", 11),
+                             Arrays.asList(new Interceptor(ctx -> Maps.put(ctx, "a", 1),
+                                                           ctx -> Maps.put(ctx, "leave-a", 11),
                                                            null),
-                                           new Interceptor((Map<Object,Object> ctx) -> Maps.put(ctx, "b", 1),
+                                           new Interceptor(ctx -> Maps.put(ctx, "b", 1),
                                                            null, null),
-                                           new Interceptor((Map<Object,Object> ctx) -> Maps.put(ctx, "c", 1),
+                                           new Interceptor(ctx -> Maps.put(ctx, "c", 1),
                                                            null, null)));
     }
 
