@@ -20,6 +20,9 @@ public class Example {
         Map context = Maps.mapOf("terminators",
                                 Arrays.asList((Predicate<Map<Object,Object>>) (Map<Object,Object> ctx) -> ctx.containsKey("b")));
 
+        // Note: When you're actually using the Chain,
+        //       you'd be better off creating static Interceptors in a class once
+        //       and just always reusing them.
         return Chain.execute(context,
                              Arrays.asList(new Interceptor(ctx -> Maps.put(ctx, "a", 1),
                                                            ctx -> Maps.put(ctx, "leave-a", 11),
