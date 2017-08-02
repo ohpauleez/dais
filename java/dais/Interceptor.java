@@ -65,5 +65,9 @@ public class Interceptor implements IInterceptor, ToInterceptor {
     public IInterceptor toInterceptor() {
         return this;
     }
+
+    //public String toString() {
+    //    return "Interceptor{enter: "+this.enterFn+", leave: "+this.leaveFn+", error: "+this.errorFn+"}";
+    //}
 }
 
