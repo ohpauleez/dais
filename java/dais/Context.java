@@ -18,7 +18,7 @@ public class Context extends HashMap<Object,Object> {
     }
 
     public Context withTerminators(List<Predicate<Map<Object,Object>>> terminators) {
-        this.put("terminators", terminators);
+        this.put("dais.terminators", terminators);
         return this;
     }
     public Context withTerminators(Predicate<Map<Object,Object>>... terminators) {
@@ -26,7 +26,7 @@ public class Context extends HashMap<Object,Object> {
     }
 
     public Context withInterceptors(List<ToInterceptor> interceptors) {
-        this.put("queue", new ArrayDeque(Arrays.asList(interceptors.stream()
+        this.put("dais.queue", new ArrayDeque(Arrays.asList(interceptors.stream()
                                                                    .map(i -> i.toInterceptor())
                                                                    .toArray())));
         return this;
@@ -35,7 +35,7 @@ public class Context extends HashMap<Object,Object> {
         return this.withInterceptors(Arrays.asList(interceptors));
     }
     public Context withInterceptors(Interceptor... interceptors) {
-        this.put("queue", new ArrayDeque(Arrays.asList(interceptors)));
+        this.put("dais.queue", new ArrayDeque(Arrays.asList(interceptors)));
         return this;
     }
 }

@@ -24,9 +24,9 @@ public class Example {
                                    .withInterceptors(new Interceptor(ctx -> Maps.put(ctx, "a", 1),
                                                                      ctx -> Maps.put(ctx, "leave-a", 11),
                                                                      null),
-                                                     new Interceptor(ctx -> Maps.put(ctx, "b", 1),
+                                                     new Interceptor(ctx -> Maps.put(ctx, "b", 2),
                                                                      null, null),
-                                                     new Interceptor(ctx -> Maps.put(ctx, "c", 1),
+                                                     new Interceptor(ctx -> Maps.put(ctx, "c", 3),
                                                                      null, null));
 
         return Chain.execute(context);
@@ -42,15 +42,15 @@ public class Example {
                              Arrays.asList(new Interceptor(ctx -> Maps.put(ctx, "a", 1),
                                                            ctx -> Maps.put(ctx, "leave-a", 11),
                                                            null),
-                                           new Interceptor(ctx -> Maps.put(ctx, "b", 1),
+                                           new Interceptor(ctx -> Maps.put(ctx, "b", 2),
                                                            null, null),
-                                           new Interceptor(ctx -> Maps.put(ctx, "c", 1),
+                                           new Interceptor(ctx -> Maps.put(ctx, "c", 3),
                                                            null, null)));
     }
 
     public static Map<Object,Object> example3() {
         // TODO: Make a Context class, subclass of HashMap, to improve the type inference and quiet this noise down
-        Map context = Maps.mapOf("terminators",
+        Map context = Maps.mapOf("dais.terminators",
                                 Arrays.asList((Predicate<Map<Object,Object>>) (Map<Object,Object> ctx) -> ctx.containsKey("b")));
 
         // Note: When you're actually using the Chain,
@@ -60,27 +60,27 @@ public class Example {
                              Arrays.asList(new Interceptor(ctx -> Maps.put(ctx, "a", 1),
                                                            ctx -> Maps.put(ctx, "leave-a", 11),
                                                            null),
-                                           new Interceptor(ctx -> Maps.put(ctx, "b", 1),
+                                           new Interceptor(ctx -> Maps.put(ctx, "b", 2),
                                                            null, null),
-                                           new Interceptor(ctx -> Maps.put(ctx, "c", 1),
+                                           new Interceptor(ctx -> Maps.put(ctx, "c", 3),
                                                            null, null)));
     }
 
     public static Map<Object,Object> example4() {
         // TODO: Make a Context class, subclass of HashMap, to improve the type inference and quiet this noise down
-        Map context = Maps.mapOf("queue",
+        Map context = Maps.mapOf("dais.queue",
                                  new ArrayDeque(
                                      Arrays.asList(new Interceptor((Map<Object,Object> ctx) -> Maps.put(ctx, "a", 1),
                                                                (Map<Object,Object> ctx) -> Maps.put(ctx, "leave-a", 11),
                                                                Function.identity()),
-                                               new Interceptor((Map<Object,Object> ctx) -> Maps.put(ctx, "b", 1),
+                                               new Interceptor((Map<Object,Object> ctx) -> Maps.put(ctx, "b", 2),
                                                                Function.identity(),
                                                                Function.identity()),
-                                               new Interceptor((Map<Object,Object> ctx) -> Maps.put(ctx, "c", 1),
+                                               new Interceptor((Map<Object,Object> ctx) -> Maps.put(ctx, "c", 3),
                                                                Function.identity(),
                                                                Function.identity()))),
 
-                                "terminators",
+                                "dais.terminators",
                                 Arrays.asList((Predicate<Map<Object,Object>>) (Map<Object,Object> ctx) -> ctx.containsKey("b")));
 
         return Chain.execute(context);

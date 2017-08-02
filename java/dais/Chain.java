@@ -19,13 +19,13 @@ public class Chain {
 
     //TODO: For now, let's just execute only forward
     public static final Map<Object,Object> execute(Map<Object,Object> context) {
-        List<Predicate<Map<Object,Object>>> terminators = (List<Predicate<Map<Object,Object>>>) context.get("terminators");
+        List<Predicate<Map<Object,Object>>> terminators = (List<Predicate<Map<Object,Object>>>) context.get("dais.terminators");
 
-        Object queue = context.get("queue");
+        Object queue = context.get("dais.queue");
         if (queue == null) {
             return context;
         }
-        Deque<IInterceptor> stack = (Deque<IInterceptor>) context.get("stack");
+        Deque<IInterceptor> stack = (Deque<IInterceptor>) context.get("dais.stack");
         stack = (stack != null) ? stack : new ArrayDeque<IInterceptor>();
 
         if (queue instanceof Deque) {
@@ -37,7 +37,7 @@ public class Chain {
         }
     }
     public static final Map<Object,Object> execute(Map<Object,Object> context, Collection<IInterceptor> queue) {
-        context.put("queue", new ArrayDeque<IInterceptor>(queue));
+        context.put("dais.queue", new ArrayDeque<IInterceptor>(queue));
         return execute(context);
     }
 
@@ -50,7 +50,7 @@ public class Chain {
 
             IInterceptor interceptor = queue.pollFirst();
             if (interceptor == null) {
-                context.remove("queue");
+                context.remove("dais.queue");
                 return handleLeave(context, stack);
             }
             stack.offerFirst(interceptor);
@@ -69,7 +69,7 @@ public class Chain {
             if (terminators != null) {
                 for (Predicate p : terminators) {
                     if (p != null && p.test(context)) {
-                        context.remove("queue");
+                        context.remove("dais.queue");
                         return handleLeave(context, stack);
                     }
                 }
@@ -114,7 +114,7 @@ public class Chain {
 
         for(IInterceptor interceptor : queue) {
             if (interceptor == null) {
-                context.remove("queue");
+                context.remove("dais.queue");
                 return handleLeave(context, stack);
             }
             stack.offerFirst(interceptor);
@@ -133,7 +133,7 @@ public class Chain {
             if (terminators != null) {
                 for (Predicate p : terminators) {
                     if (p != null && p.test(context)) {
-                        context.remove("queue");
+                        context.remove("dais.queue");
                         return handleLeave(context, stack);
                     }
                 }

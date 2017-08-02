@@ -107,9 +107,9 @@
                       {:enter (fn [ctx] (assoc ctx :c 3))}]))
 
   ;; 0.07 - 0.22 ms
-  (time (Example/example))
-  (time (Example/example2))
-  (time (Example/example3))
-  (time (Example/example4))
+  (= (time (Example/example))
+     (time (Example/example2))
+     (time (Example/example3))
+     (time (Example/example4)))
   )
 
