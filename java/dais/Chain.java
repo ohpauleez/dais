@@ -12,9 +12,12 @@ import java.util.function.Predicate;
 
 import dais.IInterceptor;
 
+// NOTE: This is programmed against the common denominator -- a Map and null checks (no Optionals)
+//       Use the dais.Maps utility class for Optional-oriented interactions with the Context map
+
 public class Chain {
 
-    //TODO: For now, let's just execute only forward, using
+    //TODO: For now, let's just execute only forward
     public static final Map<Object,Object> execute(Map<Object,Object> context) {
         List<Predicate<Map<Object,Object>>> terminators = (List<Predicate<Map<Object,Object>>>) context.get("terminators");
 

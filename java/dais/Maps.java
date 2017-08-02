@@ -11,6 +11,8 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.concurrent.ConcurrentMap;
 
+import java.util.Optional;
+
 import java.util.List;
 import java.util.Arrays;
 import java.util.ArrayList;
@@ -33,6 +35,10 @@ public class Maps {
         List kvsList = Arrays.asList(kvs);
         List<List> kvPairs = new ArrayList();
 
+        if ((kvsList.size() % 2) != 0) {
+            throw new IllegalArgumentException("Found a key without a value -- You must pass a value for all mapOf keys");
+        }
+
         // TODO: Pull this out into a List utils
         int partitionSize = 2;
         for (int i=0; i<kvsList.size(); i += partitionSize) {
@@ -52,10 +58,24 @@ public class Maps {
         return m.get(key);
     }
     public static <K, V> V get(Map<K,V> m, K key, V notFound) {
-        if (m.containsKey(key)) {
-            return m.get(key);
-        }
-        return notFound;
+        return m.getOrDefault(key, notFound);
+        //if (m.containsKey(key)) {
+        //    return m.get(key);
+        //}
+        //return notFound;
     }
+
+    public static <K,V> Optional<V> optGet(Map<K,V> m, K key) {
+        return Optional.ofNullable(m.get(key));
+    }
+    public static <K,V> Optional<V> optGet(Map<K,V> m, K key, V notFound) {
+        return Optional.ofNullable(m.getOrDefault(key, notFound));
+    }
+
+    //public static <K,V> Map<K,V> computeAt(Map<K,V> m, Function<? super V,? extends V> f, K... keys) {
+    //    // This is like `Map.compute(...)` but allows for key paths into the map
+    //    // It will create paths if the paths don't exist.
+
+    //}
 
 }
