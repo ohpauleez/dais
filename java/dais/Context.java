@@ -38,4 +38,10 @@ public class Context extends HashMap<Object,Object> {
         this.put("dais.queue", new ArrayDeque(Arrays.asList(interceptors)));
         return this;
     }
+
+    public Context withStaticInterceptors(Interceptor... interceptors) {
+        this.put("dais.queue", interceptors);
+        return this;
+    }
 }
+

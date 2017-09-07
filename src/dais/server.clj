@@ -107,9 +107,27 @@
                       {:enter (fn [ctx] (assoc ctx :c 3))}]))
 
   ;; 0.07 - 0.22 ms
+  ;; All Examples
+  (= (time (Example/example))
+     (time (Example/example1))
+     (time (Example/example2))
+     (time (Example/example2S))
+     (time (Example/example3))
+     (time (Example/example4))
+     (time (Example/exampleStatic))
+     (time (Example/exampleStatic1)))
+
+  ;; Interceptors allocated inline
   (= (time (Example/example))
      (time (Example/example2))
      (time (Example/example3))
-     (time (Example/example4)))
+     (time (Example/example4))
+     (time (Example/exampleStatic)))
+
+  ;; Static interceptors (and 'example' as a baseline)
+  (= (time (Example/example))
+     (time (Example/example1))
+     (time (Example/example2S))
+     (time (Example/exampleStatic1)))
   )
 

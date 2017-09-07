@@ -15,6 +15,12 @@ import dais.Chain;
 
 public class Example {
 
+    public static final Interceptor interA = new Interceptor(ctx -> Maps.put(ctx, "a", 1),
+                                                             ctx -> Maps.put(ctx, "leave-a", 11),
+                                                             null);
+    public static final Interceptor interB = new Interceptor(ctx -> Maps.put(ctx, "b", 2), null, null);
+    public static final Interceptor interC = new Interceptor(ctx -> Maps.put(ctx, "c", 3), null, null);
+
 
     public static Map<Object,Object> example() {
         // Note: When you're actually using the Chain,
@@ -28,6 +34,13 @@ public class Example {
                                                                      null, null),
                                                      new Interceptor(ctx -> Maps.put(ctx, "c", 3),
                                                                      null, null));
+
+        return Chain.execute(context);
+    }
+
+    public static Map<Object,Object> example1() {
+        Map context = new Context().withTerminators(ctx -> ctx.containsKey("b"))
+                                   .withInterceptors(interA, interB, interC);
 
         return Chain.execute(context);
     }
@@ -46,6 +59,13 @@ public class Example {
                                                            null, null),
                                            new Interceptor(ctx -> Maps.put(ctx, "c", 3),
                                                            null, null)));
+    }
+
+    public static Map<Object,Object> example2S() {
+        Map context = new Context().withTerminators(ctx -> ctx.containsKey("b"));
+
+        return Chain.execute(context,
+                             Arrays.asList(interA, interB, interC));
     }
 
     public static Map<Object,Object> example3() {
@@ -86,4 +106,27 @@ public class Example {
         return Chain.execute(context);
     }
 
+    public static Map<Object,Object> exampleStatic() {
+        // Note: When you're actually using the Chain,
+        //       you'd be better off creating static Interceptors in a class once
+        //       and just always reusing them.
+        Map context = new Context().withTerminators(ctx -> ctx.containsKey("b"))
+                                   .withStaticInterceptors(new Interceptor(ctx -> Maps.put(ctx, "a", 1),
+                                                                           ctx -> Maps.put(ctx, "leave-a", 11),
+                                                                           null),
+                                                           new Interceptor(ctx -> Maps.put(ctx, "b", 2),
+                                                                           null, null),
+                                                           new Interceptor(ctx -> Maps.put(ctx, "c", 3),
+                                                                           null, null));
+
+        return Chain.execute(context);
+    }
+
+    public static Map<Object,Object> exampleStatic1() {
+        Map context = new Context().withTerminators(ctx -> ctx.containsKey("b"))
+                                   .withStaticInterceptors(interA, interB, interC);
+
+        return Chain.execute(context);
+    }
 }
+
