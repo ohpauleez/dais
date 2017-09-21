@@ -15,6 +15,35 @@ import dais.IInterceptor;
 // NOTE: This is programmed against the common denominator -- a Map and null checks (no Optionals)
 //       Use the dais.Maps utility class for Optional-oriented interactions with the Context map
 
+/**
+ * Dais Chain
+ *
+ * Given a Context (Map) which contains a "dais.queue" of IInterceptors, execute the queue sequentially, and return the final Context.
+ *
+ * A series of rules/decisions are applied to decide how to execute a Chain.
+ *
+ * If the queue is empty, processing is finished and the Context is returned.
+ * Otherwise, get the first IInterceptor off of the front of the queue.
+ *
+ * If that Interceptor is null, remove the "dais.queue" from the Context and process the Leave Phase of the chain.
+ * Otherwise, place the Interceptor on the "dais.stack", so it can be processed in the Leave Phase later.
+ * Execute the Enter Phase of the Interceptor, returning a new/updated Context.
+ *
+ * If there is an "error" in the Context, handle the Error Phase.
+ * Errors are handled by calling the `error` method of the IInterceptors in the Context's stack.
+ * If the error is handled, the rest of the stack is process as a Leave Phase, calling the `leave` method of the remaining IInterceptors.
+ *
+ * If there are no errors, the Terminator Predicates are checked.
+ * If any terminator returns true, the "dais.queue" is removed from the Context and the Leave Phase is executed.
+ *
+ * Otherwise, keep looping through the queue (see the top of this doc block), until it is emtpy.
+ *
+ * Note: All modifications to the queue and stack execution should be made directly against the references to those objects.
+ *       The queue is not rebound after Interceptor execution (when an updated context is returned).
+ *       There are no checks in place to see if a program is using undefined behavior -- it is undefined.
+ *
+ *       To short-circuit chain execution, an Interceptor can call `clear` on the queue.
+ */
 public class Chain {
 
     //TODO: For now, let's just execute only forward
@@ -46,6 +75,7 @@ public class Chain {
                                                        Deque<IInterceptor> stack,
                                                        List<Predicate<Map<Object,Object>>> terminators) {
 
+        //NOTE: It's assumed the queue has been null-checked by this point
         while (queue.size() > 0) {
 
             IInterceptor interceptor = queue.pollFirst();
@@ -80,6 +110,7 @@ public class Chain {
     }
     public static final Map<Object,Object> handleLeave(Map<Object,Object> context,
                                                        Deque<IInterceptor> stack) {
+        //NOTE: It's assumed the stack has been null-checked by this point
         for (IInterceptor interceptor : stack) {
             try {
                 context = IInterceptor.leave(interceptor, context);
@@ -96,6 +127,7 @@ public class Chain {
     public static final Map<Object,Object> handleError(Map<Object,Object> context,
                                                        IInterceptor erroredInterceptor,
                                                        Deque<IInterceptor> stack) {
+        //NOTE: It's assumed the stack has been null-checked by this point
         for (IInterceptor interceptor : stack) {
             Object err = context.get("error");
             if (err != null) {
@@ -112,6 +144,7 @@ public class Chain {
                                                             Deque<IInterceptor> stack,
                                                             List<Predicate<Map<Object,Object>>> terminators) {
 
+        //NOTE: It's assumed the queue has been null-checked by this point
         for(IInterceptor interceptor : queue) {
             if (interceptor == null) {
                 context.remove("dais.queue");

@@ -106,7 +106,7 @@
                       {:enter (fn [ctx] (assoc ctx :b 2))}
                       {:enter (fn [ctx] (assoc ctx :c 3))}]))
 
-  ;; 0.07 - 0.22 ms
+  ;; 0.02 - 0.22 ms
   ;; All Examples
   (= (time (Example/example))
      (time (Example/example1))
