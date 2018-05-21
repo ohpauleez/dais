@@ -36,9 +36,9 @@
 (defn context [ctx-map]
   (reduce-kv (fn [^Map acc k v]
                (case k
-                 :queue (.put acc (name k) (ArrayDeque. v))
-                 :stack (.put acc (name k) (ArrayDeque. v))
-                 :terminators (.put acc (name k) (ArrayList. (map fn->Predicate v)))
+                 :queue (.put acc "dais.queue" (ArrayDeque. v))
+                 :stack (.put acc "dais.stack" (ArrayDeque. v))
+                 :terminators (.put acc "dais.terminators" (ArrayList. (map fn->Predicate v)))
                  (.put acc (name k) v))
                acc)
              (HashMap.)
@@ -64,7 +64,7 @@
 
   (def dynamic-context
     (context {:queue [(interceptor {:enter (fn [^Map ctx]
-                                             (let [q (.get ctx "queue")]
+                                             (let [q (.get ctx "dais.queue")]
                                                (.addFirst ^Deque q (interceptor
                                                                      {:enter (fn [^Map ctx]
                                                                                (Maps/put ctx "ZZ" 0))}))
@@ -80,7 +80,7 @@
 
   (def dynamic-last-context
     (context {:queue [(interceptor {:enter (fn [^Map ctx]
-                                             (let [q (.get ctx "queue")]
+                                             (let [q (.get ctx "dais.queue")]
                                                (.addLast ^Deque q (interceptor
                                                                      {:enter (fn [^Map ctx]
                                                                                (.put ctx "ZZ" 0)
