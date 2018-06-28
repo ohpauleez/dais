@@ -73,7 +73,7 @@ public class Chain {
     public static final Map<Object,Object> handleEnter(Map<Object,Object> context,
                                                        Deque<IInterceptor> queue,
                                                        Deque<IInterceptor> stack,
-                                                       List<Predicate<Map<Object,Object>>> terminators) {
+                                                       final List<Predicate<Map<Object,Object>>> terminators) {
 
         //NOTE: It's assumed the queue has been null-checked by this point
         while (queue.size() > 0) {
