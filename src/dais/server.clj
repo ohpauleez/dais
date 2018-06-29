@@ -35,6 +35,14 @@
                   (or (fn->Function leave) IdentityFunction)
                   (or (fn->Function error) IdentityFunction))))
 
+(defn async-interceptor [m]
+  (let [{:keys [enter leave error]} m]
+    ;; Using the identity function ensures Interceptors behave like Pedestal Interceptors for all stages
+    (Interceptor. nil
+                  (or (fn->Function enter) IdentityFunction)
+                  (or (fn->Function leave) IdentityFunction)
+                  (or (fn->Function error) IdentityFunction))))
+
 (defn context [ctx-map]
   (reduce-kv (fn [^Map acc k v]
                (case k
@@ -55,8 +63,17 @@
                       (interceptor {:enter (fn [^Map ctx] (.put ctx "c" 3) ctx)})]
               :terminators [(fn [^Map ctx] (.get ctx "b"))]}))
 
+  (def basic-async-context
+    (context {:queue [(async-interceptor {:enter (fn [^Map ctx] (.put ctx "a" 1) (CompletableFuture/completedFuture ctx))
+                                          :leave (fn [^Map ctx] (.put ctx "leave-a" 11) ctx)})
+                      (interceptor {:enter (fn [^Map ctx] (.put ctx "b" 2) ctx)})
+                      (interceptor {:enter (fn [^Map ctx] (.put ctx "c" 3) ctx)})]
+              :terminators [(fn [^Map ctx] (.get ctx "b"))]}))
+
   ;; We should only see a and b processed
   (time (Chain/execute basic-context)) ;; 0.14 - 0.30 ms
+  (time (.get ^CompletableFuture (AsyncChain/execute basic-context))) ;; 0.19 - 0.30 ms
+
   ;; 0.50 - 1.50 ms (includes construction, like the Java Example)
   (time (Chain/execute (context {:queue [(interceptor {:enter (fn [^Map ctx] (.put ctx "a" 1) ctx)
                                                        :leave (fn [^Map ctx] (.put ctx "leave-a" 11) ctx)})

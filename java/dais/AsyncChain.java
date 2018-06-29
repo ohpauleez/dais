@@ -154,16 +154,15 @@ public class AsyncChain {
             stack.offerFirst(interceptor); // Pushing to the front allows iteration without reversing
 
             try {
-                // TODO: This is impossible--
-                //       IInterceptor only works on Fns that take and return Contexts
-                Object maybeContext = IInterceptor.enter(interceptor, context);
-
-                if (maybeContext instanceof CompletionStage) {
-                    CompletionStage stage = (CompletionStage)maybeContext;
+                // If we're async, let's go async...
+                if ((interceptor instanceof IAsyncInterceptor) && ((IAsyncInterceptor) interceptor).isAsyncInterceptor())  {
+                    IAsyncInterceptor ainterceptor = (IAsyncInterceptor) interceptor;
                     Object enterAsync = context.get("dais.enterAsync");
                     if (enterAsync instanceof Function) {
                         ((Function)enterAsync).apply(context);
                     }
+                    CompletionStage stage = IAsyncInterceptor.enterAsync(ainterceptor, context);
+
                     Executor exec = (Executor)context.get("dais.executor");
                     if (exec == null) {
                         return stage.handle(
@@ -180,10 +179,10 @@ public class AsyncChain {
                                   else {ctx.put("error", ex); return executeStage(ctx, ChainPhase.ERROR);}
                                 }, exec).toCompletableFuture();
                     }
-
-                } else {
-                    context = (Map<Object,Object>)maybeContext;
                 }
+
+                // If you're here, it's a sync interceptor and business as usual
+                context = IInterceptor.enter(interceptor, context);
 
                 if (context.get("error") != null) {
                     return handleError(context, interceptor, stack);
@@ -206,7 +205,7 @@ public class AsyncChain {
 
     }
     public static final Future<Map<Object,Object>> handleLeave(Map<Object,Object> context,
-                                                       Deque<IInterceptor> stack) {
+                                                               Deque<IInterceptor> stack) {
         //NOTE: It's assumed the stack has been null-checked by this point
 
         /**
