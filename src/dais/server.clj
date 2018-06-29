@@ -93,7 +93,7 @@
               :terminators [(fn [^Map ctx] (.get ctx "ZZ"))]}))
 
   ;; We should see all interceptors processed.
-  (time (Chain/execute dynamic-last-context)) ;; 0.37 ms
+  (time (Chain/execute dynamic-last-context)) ;; 0.15 - 0.37 ms
 
   ;; 1.00 - 3.00 ms
   (time (ped-chain/execute {::ped-chain/terminators [(fn [ctx] (:ZZ ctx))]}

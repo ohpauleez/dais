@@ -19,8 +19,9 @@
                              "srepl" ["with-profile" "srepl" "trampoline" "run" "-m" "clojure.main/main"]
                              "run-dev" ["trampoline" "run" "-m" "pedestal-lambda.server/run-dev"]}
                    :resource-paths ["config" "resources" "test/resources"]
-                   :dependencies [[org.clojure/clojure "1.8.0"]
-                                  [io.pedestal/pedestal.interceptor "0.5.2"]]
+                   :dependencies [[org.clojure/clojure "1.9.0"]
+                                  [io.pedestal/pedestal.interceptor "0.5.4"]
+                                  [criterium "0.4.4"]]
                    :main ^{:skip-aot true} dais.server}
              :uberjar {:jvm-opts ["-D\"clojure.compiler.direct-linking=true\""]
                        ;:aot [dais.server]

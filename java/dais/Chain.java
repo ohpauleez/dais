@@ -76,14 +76,14 @@ public class Chain {
                                                        final List<Predicate<Map<Object,Object>>> terminators) {
 
         //NOTE: It's assumed the queue has been null-checked by this point
-        while (queue.size() > 0) {
+        while (!queue.isEmpty()) {
 
             IInterceptor interceptor = queue.pollFirst();
             if (interceptor == null) {
                 context.remove("dais.queue");
                 return handleLeave(context, stack);
             }
-            stack.offerFirst(interceptor);
+            stack.offerFirst(interceptor); // Pushing to the front allows iteration without reversing
 
             try {
                 context = IInterceptor.enter(interceptor, context);
@@ -111,7 +111,27 @@ public class Chain {
     public static final Map<Object,Object> handleLeave(Map<Object,Object> context,
                                                        Deque<IInterceptor> stack) {
         //NOTE: It's assumed the stack has been null-checked by this point
+
+        /**
+         * This for-each loop looks nice, but restarts the stack processing
+         * when it switches back to "handleLeave".
         for (IInterceptor interceptor : stack) {
+            try {
+                context = IInterceptor.leave(interceptor, context);
+                if (context.get("error") != null) {
+                    return handleError(context, interceptor, stack);
+                }
+            } catch (Throwable t) {
+                context.put("error", t);
+                return handleError(context, interceptor, stack);
+            }
+        }*/
+        while (!stack.isEmpty()) {
+            IInterceptor interceptor = stack.pollFirst(); // Our 'stack' is already "reversed" so grab the head
+            // Interceptors are null-checked when added to the stack
+            // so we shouldn't have to do that here.
+            // If an NPE happens, the user manipulated the stack directly,
+            // and that's their fault
             try {
                 context = IInterceptor.leave(interceptor, context);
                 if (context.get("error") != null) {
@@ -128,9 +148,28 @@ public class Chain {
                                                        IInterceptor erroredInterceptor,
                                                        Deque<IInterceptor> stack) {
         //NOTE: It's assumed the stack has been null-checked by this point
+
+        /**
+         * This for-each loop looks nice, but restarts the stack processing
+         * when it switches back to "handleLeave".
         for (IInterceptor interceptor : stack) {
             Object err = context.get("error");
             if (err != null) {
+                context = IInterceptor.error(interceptor, context);
+            } else {
+                return handleLeave(context, stack);
+            }
+        }
+        */
+        while (!stack.isEmpty()) {
+            Object err = context.get("error");
+            // Interceptors are null-checked when added to the stack
+            // so we shouldn't have to do that here.
+            // If an NPE happens, the user manipulated the stack directly,
+            // and that's their fault
+            if (err != null) {
+                IInterceptor interceptor = stack.pollFirst(); // Our 'stack' is already "reversed" so grab the head
+                // No need for a 'try/catch' here, because it's captured in 'handleLeave'
                 context = IInterceptor.error(interceptor, context);
             } else {
                 return handleLeave(context, stack);
