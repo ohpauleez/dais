@@ -3,6 +3,7 @@
             [io.pedestal.interceptor.chain :as ped-chain])
   (:import (java.util.function Function
                                Predicate)
+           (java.util.concurrent CompletableFuture)
            (java.util Map
                       List
                       Deque
@@ -11,6 +12,7 @@
                       ArrayDeque)
            (dais Interceptor
                  Chain
+                 AsyncChain
                  Example
                  Maps)))
 
