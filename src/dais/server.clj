@@ -11,6 +11,7 @@
                       ArrayDeque)
            (dais Interceptor
                  Chain
+                 CountChain
                  Example
                  Maps)))
 
@@ -46,6 +47,8 @@
 
 (comment
 
+  (require '[criterium.core :refer [quick-bench]])
+
   (def basic-context
     (context {:queue [(interceptor {:enter (fn [^Map ctx] (.put ctx "a" 1) ctx)
                                     :leave (fn [^Map ctx] (.put ctx "leave-a" 11) ctx)})
@@ -55,13 +58,69 @@
 
   ;; We should only see a and b processed
   (time (Chain/execute basic-context)) ;; 0.14 - 0.30 ms
+  (time (CountChain/execute basic-context)) ;; 0.14 - 0.30 ms
   ;; 0.50 - 1.50 ms (includes construction, like the Java Example)
-  (time (Chain/execute (context {:queue [(interceptor {:enter (fn [^Map ctx] (.put ctx "a" 1) ctx)
+  (time
+    (dotimes [_ 1000]
+      (Chain/execute (context {:queue [(interceptor {:enter (fn [^Map ctx] (.put ctx "a" 1) ctx)
                                                        :leave (fn [^Map ctx] (.put ctx "leave-a" 11) ctx)})
                                          (interceptor {:enter (fn [^Map ctx] (.put ctx "b" 2) ctx)})
                                          (interceptor {:enter (fn [^Map ctx] (.put ctx "c" 3) ctx)})]
-                                 :terminators [(fn [^Map ctx] (.get ctx "b"))]})))
+                                 :terminators [(fn [^Map ctx] (.get ctx "b"))]}))))
 
+  (time
+    (dotimes [_ 1000]
+      (CountChain/execute (context {:queue [(interceptor {:enter (fn [^Map ctx] (.put ctx "a" 1) ctx)
+                                                       :leave (fn [^Map ctx] (.put ctx "leave-a" 11) ctx)})
+                                         (interceptor {:enter (fn [^Map ctx] (.put ctx "b" 2) ctx)})
+                                         (interceptor {:enter (fn [^Map ctx] (.put ctx "c" 3) ctx)})]
+                                 :terminators [(fn [^Map ctx] (.get ctx "b"))]}))))
+  (quick-bench (Chain/execute (context {:queue [
+                                                (interceptor {:enter (fn [^Map ctx] (.put ctx "a" 1) ctx)
+                                                              :leave (fn [^Map ctx] (.put ctx "leave-a" 11) ctx)})
+                                                (interceptor {:enter (fn [^Map ctx] (.put ctx "b" 2) ctx)})
+                                                (interceptor {:enter (fn [^Map ctx] (.put ctx "c" 3) ctx)})
+                                                (interceptor {:enter (fn [^Map ctx] (.put ctx "a" 4) ctx)
+                                                              :leave (fn [^Map ctx] (.put ctx "leave-a" 41) ctx)})
+                                                (interceptor {:enter (fn [^Map ctx] (.put ctx "e" 5) ctx)
+                                                              :leave (fn [^Map ctx] (.put ctx "leave-e" 51) ctx)})
+                                                (interceptor {:enter (fn [^Map ctx] (.put ctx "f" 6) ctx)
+                                                              :leave (fn [^Map ctx] (.put ctx "leave-f" 61) ctx)})
+                                                (interceptor {:enter (fn [^Map ctx] (.put ctx "a" 7) ctx)
+                                                              :leave (fn [^Map ctx] (.put ctx "leave-a" 71) ctx)})
+                                                (interceptor {:enter (fn [^Map ctx] (.put ctx "g" 8) ctx)
+                                                              :leave (fn [^Map ctx] (.put ctx "leave-g" 81) ctx)})
+                                                (interceptor {:enter (fn [^Map ctx] (.put ctx "h" 9) ctx)
+                                                              :leave (fn [^Map ctx] (.put ctx "leave-h" 91) ctx)})
+                                                (interceptor {:enter (fn [^Map ctx] (.put ctx "i" 1) ctx)
+                                                              :leave (fn [^Map ctx] (.put ctx "leave-i" 11) ctx)})
+                                                (interceptor {:enter (fn [^Map ctx] (.put ctx "j" 10) ctx)
+                                                              :leave (fn [^Map ctx] (.put ctx "leave-j" 110) ctx)})
+                                                ]
+                                 :terminators [(fn [^Map ctx] (.get ctx "j"))]})))
+  (quick-bench (CountChain/execute (context {:queue [
+                                                (interceptor {:enter (fn [^Map ctx] (.put ctx "a" 1) ctx)
+                                                              :leave (fn [^Map ctx] (.put ctx "leave-a" 11) ctx)})
+                                                (interceptor {:enter (fn [^Map ctx] (.put ctx "b" 2) ctx)})
+                                                (interceptor {:enter (fn [^Map ctx] (.put ctx "c" 3) ctx)})
+                                                (interceptor {:enter (fn [^Map ctx] (.put ctx "a" 4) ctx)
+                                                              :leave (fn [^Map ctx] (.put ctx "leave-a" 41) ctx)})
+                                                (interceptor {:enter (fn [^Map ctx] (.put ctx "e" 5) ctx)
+                                                              :leave (fn [^Map ctx] (.put ctx "leave-e" 51) ctx)})
+                                                (interceptor {:enter (fn [^Map ctx] (.put ctx "f" 6) ctx)
+                                                              :leave (fn [^Map ctx] (.put ctx "leave-f" 61) ctx)})
+                                                (interceptor {:enter (fn [^Map ctx] (.put ctx "a" 7) ctx)
+                                                              :leave (fn [^Map ctx] (.put ctx "leave-a" 71) ctx)})
+                                                (interceptor {:enter (fn [^Map ctx] (.put ctx "g" 8) ctx)
+                                                              :leave (fn [^Map ctx] (.put ctx "leave-g" 81) ctx)})
+                                                (interceptor {:enter (fn [^Map ctx] (.put ctx "h" 9) ctx)
+                                                              :leave (fn [^Map ctx] (.put ctx "leave-h" 91) ctx)})
+                                                (interceptor {:enter (fn [^Map ctx] (.put ctx "i" 1) ctx)
+                                                              :leave (fn [^Map ctx] (.put ctx "leave-i" 11) ctx)})
+                                                (interceptor {:enter (fn [^Map ctx] (.put ctx "j" 10) ctx)
+                                                              :leave (fn [^Map ctx] (.put ctx "leave-j" 110) ctx)})
+                                                ]
+                                 :terminators [(fn [^Map ctx] (.get ctx "j"))]})))
   (def dynamic-context
     (context {:queue [(interceptor {:enter (fn [^Map ctx]
                                              (let [q (.get ctx "dais.queue")]
