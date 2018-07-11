@@ -106,6 +106,9 @@
                       {:enter (fn [ctx] (assoc ctx :b 2))}
                       {:enter (fn [ctx] (assoc ctx :c 3))}]))
 
+  (time (Example/exampleLong))
+  (time (Example/exampleLongRandom))
+
   ;; 0.02 - 0.22 ms
   ;; All Examples
   (= (time (Example/example))
