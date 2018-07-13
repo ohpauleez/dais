@@ -21,6 +21,7 @@
                    :resource-paths ["config" "resources" "test/resources"]
                    :dependencies [[org.clojure/clojure "1.9.0"]
                                   [io.pedestal/pedestal.interceptor "0.5.4"]
+                                  [io.vertx/vertx-core "3.5.2"]
                                   [criterium "0.4.4"]]
                    :main ^{:skip-aot true} dais.server}
              :uberjar {:jvm-opts ["-D\"clojure.compiler.direct-linking=true\""]
