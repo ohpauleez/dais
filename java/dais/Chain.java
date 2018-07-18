@@ -11,6 +11,7 @@ import java.util.ArrayDeque;
 import java.util.function.Predicate;
 
 import dais.IInterceptor;
+import dais.Context;
 
 // NOTE: This is programmed against the common denominator -- a Map and null checks (no Optionals)
 //       Use the dais.Maps utility class for Optional-oriented interactions with the Context map
@@ -46,20 +47,16 @@ import dais.IInterceptor;
  */
 public class Chain {
 
-    public static final String QUEUE_KEY = "dais.queue";
-    public static final String STACK_KEY = "dais.stack";
-    public static final String TERMINATORS_KEY = "dais.terminators";
-    public static final String ERROR_KEY = "error";
 
     //TODO: For now, let's just execute only forward
     public static final Map<Object,Object> execute(Map<Object,Object> context) {
-        List<Predicate<Map<Object,Object>>> terminators = (List<Predicate<Map<Object,Object>>>) context.get(TERMINATORS_KEY);
+        List<Predicate<Map<Object,Object>>> terminators = (List<Predicate<Map<Object,Object>>>) context.get(Context.TERMINATORS_KEY);
 
-        Object queue = context.get(QUEUE_KEY);
+        Object queue = context.get(Context.QUEUE_KEY);
         if (queue == null) {
             return context;
         }
-        Deque<IInterceptor> stack = (Deque<IInterceptor>) context.get(STACK_KEY);
+        Deque<IInterceptor> stack = (Deque<IInterceptor>) context.get(Context.STACK_KEY);
         stack = (stack != null) ? stack : new ArrayDeque<IInterceptor>();
 
         if (queue instanceof Deque) {
@@ -71,16 +68,16 @@ public class Chain {
         }
     }
     public static final Map<Object,Object> execute(Map<Object,Object> context, Collection<IInterceptor> queue) {
-        context.put(QUEUE_KEY, new ArrayDeque<IInterceptor>(queue));
+        context.put(Context.QUEUE_KEY, new ArrayDeque<IInterceptor>(queue));
         return execute(context);
     }
 
     public static final Map<Object,Object> kill(Map<Object,Object> context) {
-        Deque<IInterceptor> queue = (Deque<IInterceptor>)context.get(QUEUE_KEY);
+        Deque<IInterceptor> queue = (Deque<IInterceptor>)context.get(Context.QUEUE_KEY);
         if (queue != null) {
             queue.clear();
         }
-        Deque<IInterceptor> stack = (Deque<IInterceptor>)context.get(STACK_KEY);
+        Deque<IInterceptor> stack = (Deque<IInterceptor>)context.get(Context.STACK_KEY);
         if (stack != null) {
             stack.clear();
         }
@@ -97,7 +94,7 @@ public class Chain {
 
             IInterceptor interceptor = queue.pollFirst();
             if (interceptor == null) {
-                context.remove(QUEUE_KEY);
+                context.remove(Context.QUEUE_KEY);
                 return handleLeave(context, stack);
             }
             stack.offerFirst(interceptor); // Pushing to the front allows iteration without reversing
@@ -105,18 +102,18 @@ public class Chain {
             try {
                 context = IInterceptor.enter(interceptor, context);
 
-                if (context.get(ERROR_KEY) != null) {
+                if (context.get(Context.ERROR_KEY) != null) {
                     return handleError(context, interceptor, stack);
                 }
             } catch (Throwable t) {
-                context.put(ERROR_KEY, t);
+                context.put(Context.ERROR_KEY, t);
                 return handleError(context, interceptor, stack);
             }
 
             if (terminators != null) {
                 for (Predicate p : terminators) {
                     if (p != null && p.test(context)) {
-                        context.remove(QUEUE_KEY);
+                        context.remove(Context.QUEUE_KEY);
                         return handleLeave(context, stack);
                     }
                 }
@@ -154,11 +151,11 @@ public class Chain {
             // and that's their fault
             try {
                 context = IInterceptor.leave(interceptor, context);
-                if (context.get(ERROR_KEY) != null) {
+                if (context.get(Context.ERROR_KEY) != null) {
                     return handleError(context, interceptor, stack);
                 }
             } catch (Throwable t) {
-                context.put(ERROR_KEY, t);
+                context.put(Context.ERROR_KEY, t);
                 return handleError(context, interceptor, stack);
             }
         }
@@ -182,7 +179,7 @@ public class Chain {
         }
         */
         while (!stack.isEmpty()) {
-            Object err = context.get(ERROR_KEY);
+            Object err = context.get(Context.ERROR_KEY);
             // Interceptors are null-checked when added to the stack
             // so we shouldn't have to do that here.
             // If an NPE happens, the user manipulated the stack directly,
@@ -206,7 +203,7 @@ public class Chain {
         //NOTE: It's assumed the queue has been null-checked by this point
         for(IInterceptor interceptor : queue) {
             if (interceptor == null) {
-                context.remove(QUEUE_KEY);
+                context.remove(Context.QUEUE_KEY);
                 return handleLeave(context, stack);
             }
             stack.offerFirst(interceptor);
@@ -214,18 +211,18 @@ public class Chain {
             try {
                 context = IInterceptor.enter(interceptor, context);
 
-                if (context.get(ERROR_KEY) != null) {
+                if (context.get(Context.ERROR_KEY) != null) {
                     return handleError(context, interceptor, stack);
                 }
             } catch (Throwable t) {
-                context.put(ERROR_KEY, t);
+                context.put(Context.ERROR_KEY, t);
                 return handleError(context, interceptor, stack);
             }
 
             if (terminators != null) {
                 for (Predicate p : terminators) {
                     if (p != null && p.test(context)) {
-                        context.remove(QUEUE_KEY);
+                        context.remove(Context.QUEUE_KEY);
                         return handleLeave(context, stack);
                     }
                 }
