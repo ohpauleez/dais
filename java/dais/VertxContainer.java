@@ -119,21 +119,20 @@ public class VertxContainer extends AbstractVerticle implements Server {
         return serviceMap;
     }
 
-    public static Map<Object,Object> deploy(Map<Object,Object> serviceMap) {
+    //public static Map<Object,Object> deploy(Map<Object,Object> serviceMap) {
+    public static void deploy(Map<Object,Object> serviceMap) {
         int procs = Runtime.getRuntime().availableProcessors();
 		Vertx vertx = Vertx.vertx();
-        VertxContainer v = new VertxContainer(serviceMap);
-		vertx.deployVerticle(v
-                /*,
+        //VertxContainer v = new VertxContainer(serviceMap);
+		vertx.deployVerticle(() -> new VertxContainer(serviceMap),
 				new DeploymentOptions().setInstances(procs*2), event -> {
 					if (event.succeeded()) {
 						System.out.println("Your Vert.x application is started!");
 					} else {
 						System.out.println("Unable to start your application");
 					}
-				}*/
-                );
-        return v.serviceMap;
+				});
+        //return v.serviceMap;
     }
 
 }
