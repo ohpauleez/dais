@@ -32,13 +32,13 @@
                   (or (fn->Function leave) IdentityFunction)
                   (or (fn->Function error) IdentityFunction))))
 
-(defn root-page
-  [^Map ctx]
-  (if-let [^HttpServerRequest req (.get ctx VertxContainer/VERTX_REQUEST_KEY)]
-    (if (= (.path req) "/")
-      (.end ^HttpServerResponse (.response req) "Hello World")
-      ctx)
-    ctx))
+;(defn root-page
+;  [^Map ctx]
+;  (if-let [^HttpServerRequest req (.get ctx VertxContainer/VERTX_REQUEST_KEY)]
+;    (if (= (.path req) "/")
+;      (.end ^HttpServerResponse (.response req) "Hello World")
+;      ctx)
+;    ctx))
 
 (defn root-page
   [^Map ctx]
