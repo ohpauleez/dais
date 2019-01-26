@@ -17,6 +17,8 @@
                  Maps)))
 
 (def IdentityFunction (Function/identity))
+(def CompletableIdentityFunction (reify Function
+                                   (apply [self t] (CompletableFuture/completedFuture t))))
 
 (defn fn->Function [f]
   (when f
@@ -39,7 +41,7 @@
   (let [{:keys [enter leave error]} m]
     ;; Using the identity function ensures Interceptors behave like Pedestal Interceptors for all stages
     (Interceptor. nil
-                  (or (fn->Function enter) IdentityFunction)
+                  (or (fn->Function enter) CompletableIdentityFunction)
                   (or (fn->Function leave) IdentityFunction)
                   (or (fn->Function error) IdentityFunction))))
 
