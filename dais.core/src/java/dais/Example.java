@@ -13,7 +13,7 @@ import java.util.Random;
 import dais.Maps;
 import dais.Interceptor;
 import dais.Context; // Fluent API for the HashMap
-import dais.Chain;
+import dais.Engine;
 
 public class Example {
 
@@ -37,14 +37,14 @@ public class Example {
                                                      new Interceptor(ctx -> Maps.put(ctx, "c", 3),
                                                                      null, null));
 
-        return Chain.execute(context);
+        return Engine.execute(context);
     }
 
     public static Map<Object,Object> example1() {
         Map context = new Context().withTerminators(ctx -> ctx.containsKey("b"))
                                    .withInterceptors(interA, interB, interC);
 
-        return Chain.execute(context);
+        return Engine.execute(context);
     }
 
     public static Map<Object,Object> exampleLong() {
@@ -94,7 +94,7 @@ public class Example {
                                                                      ctx -> Maps.put(ctx, "leave-n", 141),
                                                                      null));
 
-        return Chain.execute(context);
+        return Engine.execute(context);
     }
 
     public static Map<Object,Object> exampleLongRandom() {
@@ -144,7 +144,7 @@ public class Example {
                                                                      ctx -> Maps.put(ctx, "leave-n", 141),
                                                                      null));
 
-        return Chain.execute(context);
+        return Engine.execute(context);
     }
 
     public static Map<Object,Object> example2() {
@@ -153,7 +153,7 @@ public class Example {
         // Note: When you're actually using the Chain,
         //       you'd be better off creating static Interceptors in a class once
         //       and just always reusing them.
-        return Chain.execute(context,
+        return Engine.execute(context,
                              Arrays.asList(new Interceptor(ctx -> Maps.put(ctx, "a", 1),
                                                            ctx -> Maps.put(ctx, "leave-a", 11),
                                                            null),
@@ -166,7 +166,7 @@ public class Example {
     public static Map<Object,Object> example2S() {
         Map context = new Context().withTerminators(ctx -> ctx.containsKey("b"));
 
-        return Chain.execute(context,
+        return Engine.execute(context,
                              Arrays.asList(interA, interB, interC));
     }
 
@@ -178,7 +178,7 @@ public class Example {
         // Note: When you're actually using the Chain,
         //       you'd be better off creating static Interceptors in a class once
         //       and just always reusing them.
-        return Chain.execute(context,
+        return Engine.execute(context,
                              Arrays.asList(new Interceptor(ctx -> Maps.put(ctx, "a", 1),
                                                            ctx -> Maps.put(ctx, "leave-a", 11),
                                                            null),
@@ -205,7 +205,7 @@ public class Example {
                                 "dais.terminators",
                                 Arrays.asList((Predicate<Map<Object,Object>>) (Map<Object,Object> ctx) -> ctx.containsKey("b")));
 
-        return Chain.execute(context);
+        return Engine.execute(context);
     }
 
     public static Map<Object,Object> exampleStatic() {
@@ -221,14 +221,14 @@ public class Example {
                                                            new Interceptor(ctx -> Maps.put(ctx, "c", 3),
                                                                            null, null));
 
-        return Chain.execute(context);
+        return Engine.execute(context);
     }
 
     public static Map<Object,Object> exampleStatic1() {
         Map context = new Context().withTerminators(ctx -> ctx.containsKey("b"))
                                    .withStaticInterceptors(interA, interB, interC);
 
-        return Chain.execute(context);
+        return Engine.execute(context);
     }
 }
 
