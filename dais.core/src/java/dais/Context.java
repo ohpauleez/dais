@@ -18,7 +18,7 @@ public class Context extends HashMap<Object,Object> {
     public static final String STACK_KEY = "dais.stack";
     public static final String TERMINATORS_KEY = "dais.terminators";
     public static final String ERROR_KEY = "dais.error";
-    public static final String CHAIN_KEY = "dais.chain";
+    public static final String ENGINE_KEY = "dais.engine";
     //public static final String EXECUTOR_KEY = "dais.executor";
 
     public Context() {
