@@ -75,6 +75,7 @@
                                          (interceptor {:enter (fn [^Map ctx] (.put ctx "b" 2) ctx)})
                                          (interceptor {:enter (fn [^Map ctx] (.put ctx "c" 3) ctx)})]
                                  :terminators [(fn [^Map ctx] (.get ctx "b"))]}))))
+  ;; The two chains perform identically -- 10 microsecs, with the same overhead, and the same std-dev
   (quick-bench (Chain/execute (context {:queue [
                                                 (interceptor {:enter (fn [^Map ctx] (.put ctx "a" 1) ctx)
                                                               :leave (fn [^Map ctx] (.put ctx "leave-a" 11) ctx)})
