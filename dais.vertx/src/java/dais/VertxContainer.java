@@ -30,6 +30,7 @@ public class VertxContainer extends AbstractVerticle implements Server {
     public static final String VERTX_CFG_KEY = "dais.vertx";
     public static final String HTTPSERVER_KEY = "dais.vertx.httpServer";
     public static final String VERTX_REQUEST_KEY = "dais.vertx.request";
+    public static final String VERTX_INSTANCES_COUNT_KEY = "dais.vertx.instancesCount";
 
     public final Map<Object,Object> serviceMap;
 
@@ -121,11 +122,15 @@ public class VertxContainer extends AbstractVerticle implements Server {
 
     //public static Map<Object,Object> deploy(Map<Object,Object> serviceMap) {
     public static void deploy(Map<Object,Object> serviceMap) {
-        int procs = Runtime.getRuntime().availableProcessors();
+        int instancesCount = (int)serviceMap.get(VERTX_INSTANCES_COUNT_KEY);
+        if (instancesCount == null) {
+            int procs = Runtime.getRuntime().availableProcessors();
+            instancesCount = procs*2;
+        }
 		Vertx vertx = Vertx.vertx();
         //VertxContainer v = new VertxContainer(serviceMap);
 		vertx.deployVerticle(() -> new VertxContainer(serviceMap),
-				new DeploymentOptions().setInstances(procs*2), event -> {
+				new DeploymentOptions().setInstances(instancesCount), event -> {
 					if (event.succeeded()) {
 						System.out.println("Your Vert.x application is started!");
 					} else {
