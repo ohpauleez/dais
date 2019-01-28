@@ -6,7 +6,7 @@
   :dependencies []
   :resource-paths ["config", "resources"]
   :source-paths []
-  :java-source-paths ["dais.core/src/java"]
+  :java-source-paths ["dais.core/src/java" "dais.vertx/src/java"]
   :javac-options ["-target" "1.8" "-source" "1.8"]
   ;:jvm-opts ["-D\"clojure.compiler.direct-linking=true\""]
   ;:java-agents [[org.mortbay.jetty.alpn/jetty-alpn-agent "2.0.5"]]
@@ -23,6 +23,7 @@
                    :source-paths ["dais.clj/src/clj"]
                    :dependencies [[org.clojure/clojure "1.10.0"]
                                   [io.pedestal/pedestal.interceptor "0.5.5"]
+                                  [io.vertx/vertx-core "3.6.2"]
                                   [criterium "0.4.4"]]
                    :main ^{:skip-aot true} dais.server}
              :uberjar {:jvm-opts ["-Dclojure.compiler.direct-linking=true"]
