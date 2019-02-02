@@ -122,11 +122,12 @@ public class VertxContainer extends AbstractVerticle implements Server {
 
     //public static Map<Object,Object> deploy(Map<Object,Object> serviceMap) {
     public static void deploy(Map<Object,Object> serviceMap) {
-        int instancesCount = (int)serviceMap.get(VERTX_INSTANCES_COUNT_KEY);
-        if (instancesCount == null) {
+        Integer maybeInstancesCount = (Integer)serviceMap.get(VERTX_INSTANCES_COUNT_KEY);
+        if (maybeInstancesCount == null) {
             int procs = Runtime.getRuntime().availableProcessors();
-            instancesCount = procs*2;
+            maybeInstancesCount = procs*2;
         }
+        int instancesCount = maybeInstancesCount.intValue();
 		Vertx vertx = Vertx.vertx();
         //VertxContainer v = new VertxContainer(serviceMap);
 		vertx.deployVerticle(() -> new VertxContainer(serviceMap),
