@@ -31,6 +31,7 @@ public class Maps {
         return Collectors.toConcurrentMap((e) -> e.getKey(), (e) -> e.getValue());
     }
 
+    //TODO: In Java 11, there is a Map.of static method that should be preferred
     public static Map mapOf(final Object... kvs) {
         List kvsList = Arrays.asList(kvs);
         List<List> kvPairs = new ArrayList();

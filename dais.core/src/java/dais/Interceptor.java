@@ -3,6 +3,7 @@ package dais;
 
 import dais.ToInterceptor;
 import dais.IInterceptor;
+import dais.ChainPhase;
 import dais.Maps;
 
 import java.util.function.Function;
@@ -58,6 +59,18 @@ public class Interceptor implements IInterceptor, ToInterceptor {
 
     public Function<Map<Object,Object>,Map<Object,Object>> getStage(String stageName) {
         return this.stages.get(stageName);
+    }
+    public Function<Map<Object,Object>,Map<Object,Object>> getStage(ChainPhase stagePhase) {
+        switch (stagePhase) {
+            case ENTER:
+                return this.enterFn;
+            case LEAVE:
+                return this.leaveFn;
+            case ERROR:
+                return this.errorFn;
+            default:
+                return null;
+        }
     }
 
     /* ToInterceptor
