@@ -48,7 +48,7 @@ class Interceptor {
         if (typeof enter == 'function') {
             this.enterFn = enter;
         } else if (typeof enter == 'object') {
-            this.enterFn = enter.enter;
+            this.enterFn = enter.enter || enter.enterFn;
         } else {
             this.enterFn = enter;
         }
@@ -58,10 +58,10 @@ class Interceptor {
             this.leaveFn = leave;
         } else if (typeof leave == 'object') {
             // `leave` was passed in as an Object, let's see if it has a `leave` prop
-            this.leaveFn = leave.leave;
+            this.leaveFn = leave.leave || leave.leaveFn;
         } else if ((!leave) && (typeof enter == 'object')) {
             // `leave` wasn't passed in, but `enter` is an object that might have a `leave` prop
-            this.leaveFn = enter.leave;
+            this.leaveFn = enter.leave || enter.leaveFn;
         } else {
             this.leaveFn = leave;
         }
@@ -71,10 +71,10 @@ class Interceptor {
             this.errorFn = error;
         } else if (typeof error == 'object') {
             // `error` was passed in as an Object, let's see if it has a `error` prop
-            this.errorFn = error.error;
+            this.errorFn = error.error || error.errorFn;
         } else if ((!error) && (typeof enter == 'object')) {
             // `error` wasn't passed in, but `enter` is an object that might have a `error` prop
-            this.errorFn = enter.error;
+            this.errorFn = enter.error || enter.errorFn;
         } else {
             this.errorFn = error;
         }
