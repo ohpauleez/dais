@@ -296,3 +296,10 @@ class Engine {
 
 }
 
+module.exports = {
+    ChainPhase,
+    Context,
+    Interceptor,
+    Engine
+};
+
