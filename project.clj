@@ -6,7 +6,7 @@
   :dependencies []
   :resource-paths ["config", "resources"]
   :source-paths []
-  :java-source-paths ["dais.core/src/java" "dais.vertx/src/java"]
+  :java-source-paths ["dais.chain.core/src/java" "dais.server/src/java" "dais.vertx/src/java"]
   :javac-options ["-target" "1.8" "-source" "1.8"]
   ;:jvm-opts ["-D\"clojure.compiler.direct-linking=true\""]
   ;:java-agents [[org.mortbay.jetty.alpn/jetty-alpn-agent "2.0.5"]]
