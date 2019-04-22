@@ -81,3 +81,52 @@
 (defn run [& args]
   (VertxContainer/deploy service-map))
 
+
+(comment
+
+  (import 'io.vertx.core.json.JsonObject)
+  (import 'io.vertx.core.json.Json)
+  (import 'jsonista.jackson.KeywordSerializer)
+  (require '[jsonista.core :as jsonista])
+  (require '[cheshire.core :as cheshire])
+
+  (def object-kw {:a 1 :b ["hello" "world"] :c {1 true 2 false 3 3}})
+  (def object-str {"a" 1 "b" ["hello" "world"] "c" {1 true 2 false 3 3}})
+
+  (def jsonista-mapper
+    (jsonista/object-mapper {:encode-key-fn name}))
+
+  (time (jsonista/write-value-as-string object-str))
+  (jsonista/write-value-as-string object-kw)
+
+  ; The default ObjectMapper in jsonista already has a KeywordDeserializer
+  ;(jsonista/write-value-as-string object-kw jsonista-mapper)
+
+  ;; Let's let the underlying ObjectMapper in Vertx know about Clojure types
+  (.registerModule Json/mapper (#'jsonista/clojure-module {}))
+
+  (time (.toString (JsonObject. ^java.util.Map object-str)))
+  (time (.encode (JsonObject. ^java.util.Map object-str)))
+
+  ;; Can't do this -- JsonObject assumes its keys are always strings
+  ;; Jackson Databind is built against a very narrow set of Serializers,
+  ;;  built from JsonObject, JsonArray, java.time.Instant, and Byte Arrays
+  (.toString (JsonObject. ^java.util.Map object-kw))
+  ;; but we can use the underlying mapper
+  (.writeValueAsString Json/mapper object-kw)
+
+  (time (cheshire/generate-string object-str))
+  (cheshire/generate-string object-kw)
+
+  (require '[criterium.core :as criterium])
+
+  (criterium/quick-bench (JsonObject. ^java.util.Map object-str)) ;; -- 5.3 ns Construction only
+  (criterium/quick-bench (.encode (JsonObject. ^java.util.Map object-str))) ;; 1.1 micros total
+  (criterium/quick-bench (.writeValueAsString Json/mapper object-str)) ;; 1.1 micros
+  (criterium/quick-bench (jsonista/write-value-as-string object-str)) ;; 1.1 micros
+  (criterium/quick-bench (cheshire/generate-string object-str)) ;; 4.3 micros
+
+  (criterium/quick-bench (.writeValueAsString Json/mapper object-kw)) ;; 1.1 micros
+  (criterium/quick-bench (jsonista/write-value-as-string object-kw)) ;; 1.1 micros
+  (criterium/quick-bench (cheshire/generate-string object-kw)) ;; 4.4 micros
+  )

@@ -24,6 +24,8 @@
                    :dependencies [[org.clojure/clojure "1.10.0"]
                                   [io.pedestal/pedestal.interceptor "0.5.5"]
                                   [io.vertx/vertx-core "3.6.2"]
+                                  ;[cheshire "5.8.1"] ;; too slow, too much GC
+                                  [metosin/jsonista "0.2.2"] ;; implemented in the same fashion as vertx.json, follows best practices
                                   [criterium "0.4.4"]]
                    :main ^{:skip-aot true} dais.server}
              :uberjar {:jvm-opts ["-Dclojure.compiler.direct-linking=true"]
