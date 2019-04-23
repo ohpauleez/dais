@@ -10,7 +10,7 @@
                       ArrayList
                       ArrayDeque)
            (dais Interceptor
-                 Chain
+                 Engine
                  Example
                  Context
                  Maps)))
@@ -55,9 +55,9 @@
               :terminators [(fn [^Map ctx] (.get ctx "b"))]}))
 
   ;; We should only see a and b processed
-  (time (Chain/execute basic-context)) ;; 0.14 - 0.30 ms
+  (time (Engine/execute basic-context)) ;; 0.14 - 0.30 ms
   ;; 0.50 - 1.50 ms (includes construction, like the Java Example)
-  (time (Chain/execute (context {:queue [(interceptor {:enter (fn [^Map ctx] (.put ctx "a" 1) ctx)
+  (time (Engine/execute (context {:queue [(interceptor {:enter (fn [^Map ctx] (.put ctx "a" 1) ctx)
                                                        :leave (fn [^Map ctx] (.put ctx "leave-a" 11) ctx)})
                                          (interceptor {:enter (fn [^Map ctx] (.put ctx "b" 2) ctx)})
                                          (interceptor {:enter (fn [^Map ctx] (.put ctx "c" 3) ctx)})]
@@ -77,7 +77,7 @@
               :terminators [(fn [^Map ctx] (.get ctx "ZZ"))]}))
 
   ;; We should only see A and ZZ processed.
-  (Chain/execute dynamic-context)
+  (Engine/execute dynamic-context)
 
   (def dynamic-last-context
     (context {:queue [(interceptor {:enter (fn [^Map ctx]
@@ -94,7 +94,7 @@
               :terminators [(fn [^Map ctx] (.get ctx "ZZ"))]}))
 
   ;; We should see all interceptors processed.
-  (time (Chain/execute dynamic-last-context)) ;; 0.15 - 0.37 ms
+  (time (Engine/execute dynamic-last-context)) ;; 0.15 - 0.37 ms
 
   ;; 1.00 - 3.00 ms
   (time (ped-chain/execute {::ped-chain/terminators [(fn [ctx] (:ZZ ctx))]}
