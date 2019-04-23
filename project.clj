@@ -6,7 +6,7 @@
   :dependencies []
   :resource-paths ["config", "resources"]
   :source-paths []
-  :java-source-paths ["dais.chain.core/src/java" "dais.server/src/java" "dais.vertx/src/java"]
+  :java-source-paths ["dais.chain.core/src/java" "dais.server.core/src/java" "dais.vertx/src/java"]
   :javac-options ["-target" "1.8" "-source" "1.8"]
   ;:jvm-opts ["-D\"clojure.compiler.direct-linking=true\""]
   ;:java-agents [[org.mortbay.jetty.alpn/jetty-alpn-agent "2.0.5"]]
@@ -26,7 +26,7 @@
                                   [io.vertx/vertx-core "3.6.2"]
                                   ;[cheshire "5.8.1"] ;; too slow, too much GC
                                   [metosin/jsonista "0.2.2"] ;; implemented in the same fashion as vertx.json, follows best practices
-                                  [criterium "0.4.4"]]
+                                  [criterium "0.4.5"]]
                    :main ^{:skip-aot true} dais.server}
              :uberjar {:jvm-opts ["-Dclojure.compiler.direct-linking=true"]
                        ;:aot [dais.server]
