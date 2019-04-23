@@ -99,14 +99,15 @@
 
   ;; 1.00 - 3.00 ms
   (time (ped-chain/execute {::ped-chain/terminators [(fn [ctx] (:ZZ ctx))]}
-                     [{:enter (fn [ctx]
-                                (-> ctx
-                                    (assoc :a 1)
-                                    (update-in [::ped-chain/queue]
-                                               conj (ped-interceptor/interceptor {:enter (fn [ctx] (assoc ctx :ZZ 0))}))))
-                       :leave (fn [ctx] (assoc ctx :leave-a 11))}
-                      {:enter (fn [ctx] (assoc ctx :b 2))}
-                      {:enter (fn [ctx] (assoc ctx :c 3))}]))
+                           [(ped-interceptor/interceptor
+                              {:enter (fn [ctx]
+                                        (-> ctx
+                                            (assoc :a 1)
+                                            (update-in [::ped-chain/queue]
+                                                       conj (ped-interceptor/interceptor {:enter (fn [ctx] (assoc ctx :ZZ 0))}))))
+                               :leave (fn [ctx] (assoc ctx :leave-a 11))})
+                            (ped-interceptor/interceptor {:enter (fn [ctx] (assoc ctx :b 2))})
+                            (ped-interceptor/interceptor {:enter (fn [ctx] (assoc ctx :c 3))})]))
 
   (time (Example/exampleLong))
   (time (Example/exampleLongRandom))
