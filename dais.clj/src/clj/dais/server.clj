@@ -56,6 +56,7 @@
 
   ;; We should only see a and b processed
   (time (Engine/execute basic-context)) ;; 0.14 - 0.30 ms
+  (time (.get (Engine/completableExecute basic-context))) ;; 0.14 - 0.30 ms
   ;; 0.50 - 1.50 ms (includes construction, like the Java Example)
   (time (Engine/execute (context {:queue [(interceptor {:enter (fn [^Map ctx] (.put ctx "a" 1) ctx)
                                                        :leave (fn [^Map ctx] (.put ctx "leave-a" 11) ctx)})
