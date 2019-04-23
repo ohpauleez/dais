@@ -2,11 +2,16 @@
 package dais;
 
 import java.util.Arrays;
+
 import java.util.Map;
 import java.util.List;
+import java.util.Deque;
 import java.util.ArrayDeque;
 import java.util.function.Function;
 import java.util.function.Predicate;
+
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.CompletableFuture;
 
 import java.util.Random;
 
@@ -227,6 +232,71 @@ public class Example {
     public static Map<Object,Object> exampleStatic1() {
         Map context = new Context().withTerminators(ctx -> ctx.containsKey("b"))
                                    .withStaticInterceptors(interA, interB, interC);
+
+        return Engine.execute(context);
+    }
+
+    public static Map<Object,Object> exampleAsync1() {
+        Map context = new Context().withTerminators(ctx -> ctx.containsKey("b"))
+                                   .withInterceptors(new Interceptor(ctx -> Maps.put(ctx, "a", 1),
+                                                                     ctx -> Maps.put(ctx, "leave-a", 11),
+                                                                     null),
+                                                     new Interceptor(ctx -> Maps.put(ctx, "b", 2),
+                                                                     null, null),
+                                                     new Interceptor(ctx -> Maps.put(ctx, "c", 3),
+                                                                     null, null))
+                                   .withEngine(new Engine()
+                                    {
+                                    public CompletionStage<Map<Object,Object>> handleEnter(Map<Object,Object> c,
+                                                                                           Deque<IInterceptor> q,
+                                                                                           Deque<IInterceptor> s,
+                                                                                           final List<Predicate<Map<Object,Object>>> terminators){
+                                        // Grab `final` versions of our params so we can use them in the Lambda below
+                                        final Map<Object,Object> ctx = c;
+                                        final Deque<IInterceptor> queue = q;
+                                        final Deque<IInterceptor> stack = s;
+                                        // This technically works, but it'd be better to wrap each interceptor in a CompletableFuture
+                                        return CompletableFuture.supplyAsync(() -> {
+                                            // Toggle our context so we can mutate in this scope
+                                            Map<Object,Object> context = ctx;
+                                            Map<Object,Object> result = null;
+
+                                            //NOTE: It's assumed the queue has been null-checked by this point
+                                            while (!queue.isEmpty()) {
+
+                                                IInterceptor interceptor = queue.pollFirst();
+                                                if (interceptor == null) {
+                                                    queue.clear();
+                                                    context.remove(Context.QUEUE_KEY);
+                                                    result = Engine.doLeave(context, stack);
+                                                }
+                                                stack.offerFirst(interceptor); // Pushing to the front allows iteration without reversing
+
+                                                try {
+                                                    context = IInterceptor.enter(interceptor, context);
+                                                    result = context;
+
+                                                    if (context.get(Context.ERROR_KEY) != null) {
+                                                        result = Engine.doError(context, interceptor, stack);
+                                                    }
+                                                } catch (Throwable t) {
+                                                    context.put(Context.ERROR_KEY, t);
+                                                    result = Engine.doError(context, interceptor, stack);
+                                                }
+
+                                                if (terminators != null) {
+                                                    for (Predicate p : terminators) {
+                                                        if (p != null && p.test(context)) {
+                                                            queue.clear();
+                                                            context.remove(Context.QUEUE_KEY);
+                                                            result = Engine.doLeave(context, stack);
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            return result;
+                                        });
+                                    }});
 
         return Engine.execute(context);
     }
