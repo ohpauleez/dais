@@ -63,6 +63,7 @@ public interface Engine {
 
             IInterceptor interceptor = queue.pollFirst();
             if (interceptor == null) {
+                queue.clear();
                 context.remove(Context.QUEUE_KEY);
                 result = Engine.doLeave(context, stack);
             }
@@ -83,6 +84,7 @@ public interface Engine {
             if (terminators != null) {
                 for (Predicate p : terminators) {
                     if (p != null && p.test(context)) {
+                        queue.clear();
                         context.remove(Context.QUEUE_KEY);
                         result = Engine.doLeave(context, stack);
                     }
