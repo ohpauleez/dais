@@ -11,6 +11,7 @@ import java.util.function.Predicate;
 
 import dais.ToInterceptor;
 import dais.Interceptor;
+import dais.Engine;
 
 public class Context extends HashMap<Object,Object> {
 
@@ -49,6 +50,11 @@ public class Context extends HashMap<Object,Object> {
 
     public Context withStaticInterceptors(Interceptor... interceptors) {
         this.put(QUEUE_KEY, interceptors);
+        return this;
+    }
+
+    public Context withEngine(Engine engine) {
+        this.put(ENGINE_KEY, engine);
         return this;
     }
 
