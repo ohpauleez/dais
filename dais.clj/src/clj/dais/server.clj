@@ -134,5 +134,7 @@
      (time (Example/example1))
      (time (Example/example2S))
      (time (Example/exampleStatic1)))
+
+  (time (Example/exampleAsync1))
   )
 
