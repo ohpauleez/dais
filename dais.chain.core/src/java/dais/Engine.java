@@ -8,6 +8,7 @@ import java.util.Collection;
 
 import java.util.ArrayDeque;
 
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import java.util.concurrent.Future;
@@ -341,6 +342,28 @@ public interface Engine {
                 break;
             default:
                 result = context;
+        }
+
+        if (result instanceof CompletionStage) {
+            return ((CompletionStage<Map<Object,Object>>)result).toCompletableFuture().get();
+        } else if (result instanceof Future) {
+            return ((Future<Map<Object,Object>>)result).get();
+        } else {
+            return (Map<Object,Object>)result;
+        }
+    }
+
+    static Map<Object,Object> executeDispatch(Map<Object,Object> context, Object keyOrPhase) throws InterruptedException, ExecutionException {
+        if (keyOrPhase instanceof ChainPhase) {
+            return executeStage(context, (ChainPhase)keyOrPhase);
+        }
+        Object value = context.get(keyOrPhase);
+        Object result;
+
+        if (value instanceof Function) {
+            result = ((Function<Map<Object,Object>,Object>)value).apply((Map<Object,Object>)value);
+        } else {
+            return context;
         }
 
         if (result instanceof CompletionStage) {
