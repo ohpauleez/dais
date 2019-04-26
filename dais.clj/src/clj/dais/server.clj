@@ -1,6 +1,7 @@
 (ns dais.server
   (:require [io.pedestal.interceptor :as ped-interceptor]
-            [io.pedestal.interceptor.chain :as ped-chain])
+            [io.pedestal.interceptor.chain :as ped-chain]
+            [sieppari.core :as sieppari])
   (:import (java.util.function Function
                                Predicate)
            (java.util Map
@@ -97,6 +98,15 @@
   ;; We should see all interceptors processed.
   (time (Engine/execute dynamic-last-context)) ;; 0.15 - 0.37 ms
 
+  (def ped-inters [(ped-interceptor/interceptor
+                     {:enter (fn [ctx]
+                               (-> ctx
+                                   (assoc :a 1)
+                                   (update-in [::ped-chain/queue]
+                                              conj (ped-interceptor/interceptor {:enter (fn [ctx] (assoc ctx :ZZ 0))}))))
+                      :leave (fn [ctx] (assoc ctx :leave-a 11))})
+                   (ped-interceptor/interceptor {:enter (fn [ctx] (assoc ctx :b 2))})
+                   (ped-interceptor/interceptor {:enter (fn [ctx] (assoc ctx :c 3))})])
   ;; 1.00 - 3.00 ms
   (time (ped-chain/execute {::ped-chain/terminators [(fn [ctx] (:ZZ ctx))]}
                            [(ped-interceptor/interceptor
@@ -108,6 +118,21 @@
                                :leave (fn [ctx] (assoc ctx :leave-a 11))})
                             (ped-interceptor/interceptor {:enter (fn [ctx] (assoc ctx :b 2))})
                             (ped-interceptor/interceptor {:enter (fn [ctx] (assoc ctx :c 3))})]))
+  (time (ped-chain/execute {::ped-chain/terminators [(fn [ctx] (:ZZ ctx))]}
+                           ped-inters))
+  ;; Sieppari doesn't seem to work -- keeps returning nil
+  ;;   There's also no notion of terminators, so that's not going to work.
+  ;(time (sieppari/execute [{:enter (-> ctx
+  ;                                     (assoc :a 1)
+  ;                                     (update-in [:queue]
+  ;                                                conj {:enter (fn [ctx] (assoc ctx :ZZ 0))}))
+  ;                             ;:leave (fn [ctx] (assoc ctx :leave-a 11))
+  ;                             }
+  ;                           ;{:enter (fn [ctx] (assoc ctx :b 2))}
+  ;                          ;{:enter (fn [ctx] (assoc ctx :c 3))}
+  ;                          ]
+  ;                        {:hello "world"}))
+
 
   (time (Example/exampleLong))
   (time (Example/exampleLongRandom))

@@ -23,6 +23,7 @@
                    :source-paths ["dais.clj/src/clj"]
                    :dependencies [[org.clojure/clojure "1.10.0"]
                                   [io.pedestal/pedestal.interceptor "0.5.5"]
+                                  ;[metosin/sieppari "0.0.0-alpha7"] ;; basic interceptor lib, but doesn't provide all needed functionality
                                   [io.vertx/vertx-core "3.6.2"]
                                   ;[cheshire "5.8.1"] ;; too slow, too much GC
                                   [metosin/jsonista "0.2.2"] ;; implemented in the same fashion as vertx.json, follows best practices
