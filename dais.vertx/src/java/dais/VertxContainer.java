@@ -11,6 +11,7 @@ import java.util.function.Predicate;
 import io.vertx.core.Vertx;
 import io.vertx.core.Verticle;
 import io.vertx.core.DeploymentOptions;
+import io.vertx.core.VertxOptions;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.buffer.Buffer;
@@ -27,9 +28,9 @@ import dais.ToInterceptor;
 public class VertxContainer extends AbstractVerticle implements Server {
 
     public static final String VERTX_KEY = "dais.vertx";
-    public static final String VERTX_CFG_KEY = "dais.vertx";
     public static final String HTTPSERVER_KEY = "dais.vertx.httpServer";
     public static final String VERTX_REQUEST_KEY = "dais.vertx.request";
+    public static final String VERTX_CFG_KEY = "dais.vertx.options";
     public static final String VERTX_INSTANCES_COUNT_KEY = "dais.vertx.instancesCount";
 
     public final Map<Object,Object> serviceMap;
@@ -66,6 +67,13 @@ public class VertxContainer extends AbstractVerticle implements Server {
             serveOpts = new HttpServerOptions();
             serveOpts.setPort(8080);
             serveOpts.setHost("localhost");
+            serveOpts.setReuseAddress(true);
+            serveOpts.setReusePort(true);
+            //serveOpts.setTcpFastOpen(true);
+            //serveOpts.setTcpNoDelay(true);
+            //serveOpts.setTcpQuickAck(true);
+            //serveOpts.setTcpKeepAlive(true);
+
         }
         httpServer = vertx.createHttpServer(serveOpts);
 
@@ -128,16 +136,22 @@ public class VertxContainer extends AbstractVerticle implements Server {
             maybeInstancesCount = procs*2;
         }
         int instancesCount = maybeInstancesCount.intValue();
-		Vertx vertx = Vertx.vertx();
+        VertxOptions vertxOptions = (VertxOptions)serviceMap.get(VERTX_CFG_KEY);
+        if (vertxOptions == null) {
+            vertxOptions = new VertxOptions();
+            vertxOptions.setPreferNativeTransport(true);
+        }
+		Vertx vertx = Vertx.vertx(vertxOptions);
         //VertxContainer v = new VertxContainer(serviceMap);
 		vertx.deployVerticle(() -> new VertxContainer(serviceMap),
-				new DeploymentOptions().setInstances(instancesCount), event -> {
-					if (event.succeeded()) {
-						System.out.println("Your Vert.x application is started!");
-					} else {
-						System.out.println("Unable to start your application");
-					}
-				});
+				             new DeploymentOptions().setInstances(instancesCount),
+                             event -> {
+                                 if (event.succeeded()) {
+                                     System.out.println("Your Vert.x application is started!");
+                                 } else {
+                                     System.out.println("Unable to start your application");
+                                 }
+                             });
         //return v.serviceMap;
     }
 
